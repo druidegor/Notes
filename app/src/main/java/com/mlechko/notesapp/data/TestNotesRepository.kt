@@ -14,6 +14,15 @@ object TestNotesRepository: NotesRepository {
 
     private val repository = MutableStateFlow<List<Note>>(listOf())
 
+    init {
+        repeat(50) {
+            val note = Note(id = it, title = "title $it", content = "content $it", isPinned = false, updatedAt = 1)
+            repository.update {
+                it + note
+            }
+        }
+    }
+
     override fun addNote(note: Note) {
         repository.update {
             it + note
