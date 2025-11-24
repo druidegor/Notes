@@ -4,7 +4,7 @@ class SwitchPinnedStatusUseCase(
     private val repository: NotesRepository
 ) {
 
-    operator fun invoke(noteId: Int) {
+    operator suspend fun invoke(noteId: Int) {
         repository.switchPinnedStatus(noteId)
     }
 }

@@ -16,20 +16,32 @@ object TestNotesRepository: NotesRepository {
 
     init {
         repeat(50) {
-            val note = Note(id = it, title = "title $it", content = "content $it", isPinned = false, updatedAt = 1)
+            val note = Note(id = it, title = "title $it", content = "content $it", isPinned = false, updatedAt = System.currentTimeMillis())
             repository.update {
                 it + note
             }
         }
     }
 
-    override fun addNote(note: Note) {
+    override suspend fun addNote(
+        title: String,
+        content: String,
+        isPinned: Boolean,
+        updatedAt: Long
+    ) {
         repository.update {
+            val note = Note(
+                id = it.size,
+                title = title,
+                content = content,
+                isPinned = isPinned,
+                updatedAt = updatedAt
+            )
             it + note
         }
     }
 
-    override fun deleteNote(noteId: Int) {
+    override suspend fun deleteNote(noteId: Int) {
         repository.update { previousList ->
             previousList.toMutableList()
                 .removeIf {
@@ -39,7 +51,7 @@ object TestNotesRepository: NotesRepository {
         }
     }
 
-    override fun editNote(note: Note) {
+    override suspend fun editNote(note: Note) {
         repository.update { previousList ->
             previousList.map {
                 if (it.id == note.id)
@@ -54,7 +66,7 @@ object TestNotesRepository: NotesRepository {
         return repository.asStateFlow()
     }
 
-    override fun getNote(noteId: Int): Note {
+    override suspend fun getNote(noteId: Int): Note {
         return repository.value.first { it.id == noteId }
     }
 
@@ -66,7 +78,7 @@ object TestNotesRepository: NotesRepository {
         }
     }
 
-    override fun switchPinnedStatus(noteId: Int) {
+    override suspend fun switchPinnedStatus(noteId: Int) {
         repository.update { previousList ->
             previousList.map {
                 if (it.id == noteId) {

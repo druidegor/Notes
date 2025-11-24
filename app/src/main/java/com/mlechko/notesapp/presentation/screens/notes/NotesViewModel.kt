@@ -3,6 +3,7 @@
 package com.mlechko.notesapp.presentation.screens.notes
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.mlechko.notesapp.data.TestNotesRepository
 import com.mlechko.notesapp.domain.GetAllNotesUseCase
 import com.mlechko.notesapp.domain.Note
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class NotesViewModel: ViewModel() {
 
@@ -30,7 +32,6 @@ class NotesViewModel: ViewModel() {
     val state = _state.asStateFlow()
 
     private val query = MutableStateFlow<String>("")
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
 
@@ -50,18 +51,20 @@ class NotesViewModel: ViewModel() {
                 val otherNotes = notes.filter { !it.isPinned }
                 _state.update { it.copy(pinnedNotes = pinnedNotes, otherNotes = otherNotes) }
             }
-            .launchIn(scope)
+            .launchIn(viewModelScope)
     }
 
     fun processCommands(command: NotesScreenCommand){
+        viewModelScope.launch {
+            when (command) {
 
-        when(command){
+                is NotesScreenCommand.InputSearchQuery -> {
+                    query.update { command.query.trim() }
+                }
 
-            is NotesScreenCommand.InputSearchQuery -> {
-                query.update { command.query.trim() }
-            }
-            is NotesScreenCommand.SwitchPinnedStatus -> {
-                switchPinnedStatus(command.noteId)
+                is NotesScreenCommand.SwitchPinnedStatus -> {
+                    switchPinnedStatus(command.noteId)
+                }
             }
         }
     }
