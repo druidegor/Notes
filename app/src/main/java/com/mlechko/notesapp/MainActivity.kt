@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.mlechko.notesapp.navigation.NavGraph
 import com.mlechko.notesapp.presentation.screens.notes.NotesScreen
 import com.mlechko.notesapp.ui.theme.NotesAppTheme
 
@@ -20,14 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NotesAppTheme {
-                NotesScreen(
-                    onNoteClick = {
-
-                    },
-                    onAddNoteClick = {
-
-                    }
-                )
+                NavGraph()
             }
         }
     }

@@ -34,7 +34,7 @@ import com.mlechko.notesapp.presentation.utils.DateFormatter
 
 @Composable
 fun CreateNoteScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     viewModel: CreateNoteViewModel = viewModel(),
     onFinished: () -> Unit
 ) {

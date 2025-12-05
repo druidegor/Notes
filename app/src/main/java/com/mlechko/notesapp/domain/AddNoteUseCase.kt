@@ -4,7 +4,7 @@ class AddNoteUseCase (
     private val repository: NotesRepository
 ){
 
-    operator suspend fun invoke(
+    suspend operator  fun invoke(
         title: String,
         content: String
     ) {
