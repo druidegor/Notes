@@ -1,15 +1,13 @@
 package com.mlechko.notesapp.presentation.screens.notes
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,10 +15,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
@@ -36,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,12 +44,14 @@ import com.mlechko.notesapp.domain.Note
 import com.mlechko.notesapp.presentation.utils.DateFormatter
 import com.mlechko.notesapp.ui.theme.OtherNotesColors
 import com.mlechko.notesapp.ui.theme.PinnedNotesColors
-import kotlin.rem
 
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
-    viewModel: NotesViewModel = viewModel(),
+    context: Context = LocalContext.current.applicationContext,
+    viewModel: NotesViewModel = viewModel{
+        NotesViewModel(context)
+    },
     onNoteClick: (Note) -> Unit,
     onAddNoteClick: () -> Unit
 ) {
@@ -154,7 +153,9 @@ fun NotesScreen(
                         .padding(horizontal = 24.dp, vertical = 4.dp),
                     note = note,
                     backgroundColor = OtherNotesColors[index % OtherNotesColors.size],
-                    onNoteClick = onNoteClick,
+                    onNoteClick = {
+                        viewModel.processCommands(NotesScreenCommand.SwitchPinnedStatus(note.id))
+                                  },
                     onLongClick = {
                         viewModel.processCommands(NotesScreenCommand.SwitchPinnedStatus(note.id))
                     }

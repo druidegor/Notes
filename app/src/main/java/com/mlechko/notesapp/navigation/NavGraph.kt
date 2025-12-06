@@ -12,30 +12,35 @@ import com.mlechko.notesapp.presentation.screens.notes.NotesScreen
 @Composable
 fun NavGraph(){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.MainScreen.route) {
 
-        composable(Screen.CreationScreen.route) {
-            CreateNoteScreen {
-                navController.popBackStack()
-            }
-        }
-
-        composable(Screen.EditScreen.route) {
-            val noteId = Screen.EditScreen.getNoteId(it.arguments)
-            EditNoteScreen(
-                noteId = noteId
-            ) {
-                navController.popBackStack()
-            }
-        }
-
-        composable(Screen.MainScreen.route) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Notes.route
+    ) {
+        composable(Screen.Notes.route) {
             NotesScreen(
                 onNoteClick = {
-                    navController.navigate(Screen.EditScreen.createRoute(it.id))
+                    navController.navigate(Screen.EditNote.createRoute(it.id))
                 },
                 onAddNoteClick = {
-                    navController.navigate(Screen.CreationScreen.route)
+                    navController.navigate(Screen.CreateNote.route)
+                }
+            )
+        }
+
+        composable(Screen.CreateNote.route) {
+            CreateNoteScreen(
+                onFinished = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.EditNote.route) {
+            EditNoteScreen(
+                noteId = Screen.EditNote.getNoteId(it.arguments),
+                onFinished = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -44,18 +49,19 @@ fun NavGraph(){
 
 sealed class Screen(val route: String) {
 
-    data object CreationScreen: Screen("create_note")
+    data object Notes: Screen("notes")
 
-    data object MainScreen: Screen("notes")
+    data object CreateNote: Screen("create_note")
 
-    data object EditScreen: Screen("edit_note/{note_id}") {
+    data object EditNote: Screen("edit_note/{note_id}") {
 
-        fun createRoute(noteId: Int): String {
-            return "edit_note/$noteId"
+        fun createRoute(noteId: Int): String{
+            return "edit_note/${noteId}"
         }
 
         fun getNoteId(arguments: Bundle?): Int {
             return arguments?.getString("note_id")?.toInt() ?: 0
         }
     }
+
 }

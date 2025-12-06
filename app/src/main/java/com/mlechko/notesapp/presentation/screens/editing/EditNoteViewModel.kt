@@ -3,7 +3,7 @@ package com.mlechko.notesapp.presentation.screens.editing
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mlechko.notesapp.data.TestNotesRepository
+import com.mlechko.notesapp.data.NotesRepositoryImpl
 import com.mlechko.notesapp.domain.DeleteNoteUseCase
 import com.mlechko.notesapp.domain.EditNoteUseCase
 import com.mlechko.notesapp.domain.GetNoteUseCase
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class EditNoteViewModel(private val noteId: Int, context: Context): ViewModel() {
 
-    private val repository = TestNotesRepository
+    private val repository = NotesRepositoryImpl.getInstance(context)
 
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
