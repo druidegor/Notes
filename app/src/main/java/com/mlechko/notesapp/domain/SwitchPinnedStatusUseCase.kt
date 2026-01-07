@@ -1,6 +1,8 @@
 package com.mlechko.notesapp.domain
 
-class SwitchPinnedStatusUseCase(
+import javax.inject.Inject
+
+class SwitchPinnedStatusUseCase @Inject constructor(
     private val repository: NotesRepository
 ) {
 

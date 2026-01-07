@@ -1,6 +1,8 @@
 package com.mlechko.notesapp.domain
 
-class EditNoteUseCase(
+import jakarta.inject.Inject
+
+class EditNoteUseCase @Inject constructor(
     private val repository: NotesRepository
 ) {
 

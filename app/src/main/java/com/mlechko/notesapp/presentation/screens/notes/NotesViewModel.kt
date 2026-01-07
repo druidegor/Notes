@@ -10,6 +10,7 @@ import com.mlechko.notesapp.domain.GetAllNotesUseCase
 import com.mlechko.notesapp.domain.Note
 import com.mlechko.notesapp.domain.SearchNotesUseCase
 import com.mlechko.notesapp.domain.SwitchPinnedStatusUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,15 +21,15 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NotesViewModel(context: Context): ViewModel() {
+@HiltViewModel
+class NotesViewModel @Inject constructor(
+    private val getAllNotes : GetAllNotesUseCase,
+    private val searchNotes : SearchNotesUseCase,
+    private val switchPinnedStatus : SwitchPinnedStatusUseCase
+    ): ViewModel() {
 
-    private val repository = NotesRepositoryImpl.getInstance(context)
-
-    private val getAllNotes = GetAllNotesUseCase(repository)
-    private val searchNotes = SearchNotesUseCase(repository)
-
-    private val switchPinnedStatus = SwitchPinnedStatusUseCase(repository)
     private val _state = MutableStateFlow<NotesScreenState>(NotesScreenState())
     val state = _state.asStateFlow()
 
