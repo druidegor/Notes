@@ -4,13 +4,21 @@ package com.mlechko.notesapp.presentation.screens.editing
 
 
 import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -26,8 +34,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -35,8 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
+import com.mlechko.notesapp.domain.ContentItem
 import com.mlechko.notesapp.presentation.screens.editing.EditNoteCommand.*
 import com.mlechko.notesapp.presentation.utils.DateFormatter
+import com.mlechko.notesapp.ui.theme.CustomIcons
 
 @Composable
 fun EditNoteScreen(
@@ -52,6 +66,15 @@ fun EditNoteScreen(
 
     val state = viewModel.state.collectAsState()
     val currentState = state.value
+
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = {uri ->
+            uri?.let {
+                viewModel.processCommand(EditNoteCommand.AddImage(uri = it))
+            }
+        }
+    )
 
     when(currentState) {
         is EditNoteState.Editing -> {
@@ -81,6 +104,16 @@ fun EditNoteScreen(
                                     },
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = "Delete note"
+                            )
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 24.dp)
+                                    .clickable {
+                                        imagePicker.launch("image/*")
+                                    },
+                                imageVector = CustomIcons.AddPhoto,
+                                contentDescription = "Add photo from gallery",
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         },
                         navigationIcon = {
@@ -133,32 +166,19 @@ fun EditNoteScreen(
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextField(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(horizontal = 8.dp)
+
+                    Content(
+                        modifier = Modifier
                             .weight(1f),
-                        value = currentState.note.content,
-                        onValueChange = {
-                            viewModel.processCommand(InputContent(it))
+                        content = currentState.note.content,
+                        onDeleteImageClick = {
+                            viewModel.processCommand(EditNoteCommand.RemoveImage(it))
                         },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        textStyle = TextStyle(
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        placeholder = {
-                            Text(
-                                text = "Note something down",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                            )
+                        onTextChange = { index, text ->
+                            viewModel.processCommand(EditNoteCommand.InputContent(text,index))
                         }
                     )
+
                     Button(
                         modifier= Modifier
                             .padding(horizontal = 24.dp)
@@ -189,4 +209,132 @@ fun EditNoteScreen(
         }
         EditNoteState.Initial -> { }
     }
+}
+@Composable
+private fun Content(
+    modifier: Modifier = Modifier,
+    content: List<ContentItem>,
+    onTextChange: (Int,String) -> Unit,
+    onDeleteImageClick: (Int) -> Unit
+) {
+    LazyColumn(
+        modifier = modifier
+    ) {
+        content.forEachIndexed { index, contentItem ->
+            item(key = index) {
+                when(contentItem) {
+                    is ContentItem.Image -> {
+                        val isAlreadyDisplayed: Boolean = index > 0 && content[index - 1] is ContentItem.Image
+
+                        content.takeIf { !isAlreadyDisplayed }
+                            ?.drop(index)
+                            ?.takeWhile { it is ContentItem.Image }
+                            ?.map { (it as ContentItem.Image).url }
+                            ?.let {
+                                ImageGroup(
+                                    modifier = Modifier.padding(horizontal = 24.dp),
+                                    imageUrls = it,
+                                    onDeleteImageClick = {imageIndex ->
+                                        onDeleteImageClick(index + imageIndex)
+                                    }
+                                )
+                            }
+                    }
+                    is ContentItem.Text -> {
+                        TextContent(
+                            text = contentItem.content,
+                            onTextChange = {
+                                onTextChange(index,it)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ImageGroup(
+    modifier: Modifier = Modifier,
+    imageUrls: List<String>,
+    onDeleteImageClick: (Int) -> Unit
+) {
+    Row (
+        modifier=modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ){
+        imageUrls.forEachIndexed { index, url ->
+            ImageContent(
+                modifier = Modifier.weight(1f),
+                imageUrl = url,
+                onDeleteImageClick = {
+                    onDeleteImageClick(index)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ImageContent(
+    modifier: Modifier = Modifier,
+    imageUrl: String,
+    onDeleteImageClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp)),
+            model = imageUrl,
+            contentDescription = "Image from gallery",
+            contentScale = ContentScale.FillWidth
+        )
+        Icon(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .size(24.dp)
+                .clickable {
+                    onDeleteImageClick()
+                },
+            imageVector = Icons.Default.Close,
+            contentDescription = "Delete image",
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun TextContent(
+    modifier: Modifier = Modifier,
+    text: String,
+    onTextChange: (String) -> Unit
+) {
+    TextField(
+        modifier = modifier.fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        value = text,
+        onValueChange = onTextChange,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
+        textStyle = TextStyle(
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        placeholder = {
+            Text(
+                text = "Note something down",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+            )
+        }
+    )
 }

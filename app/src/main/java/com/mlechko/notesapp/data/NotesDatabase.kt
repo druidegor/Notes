@@ -8,7 +8,7 @@ import java.util.concurrent.locks.Lock
 
 @Database(
     entities = [NoteDbModel::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class NotesDatabase: RoomDatabase() {
@@ -33,7 +33,7 @@ abstract class NotesDatabase: RoomDatabase() {
                     context = context,
                     klass = NotesDatabase::class.java,
                     name = "notes.db"
-                ).build().also {
+                ).fallbackToDestructiveMigration(dropAllTables = true).build().also {
                     instance = it
                 }
             }

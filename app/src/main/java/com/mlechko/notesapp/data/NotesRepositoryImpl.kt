@@ -2,6 +2,7 @@ package com.mlechko.notesapp.data
 
 import android.content.Context
 import androidx.room.Database
+import com.mlechko.notesapp.domain.ContentItem
 import com.mlechko.notesapp.domain.Note
 import com.mlechko.notesapp.domain.NotesRepository
 import kotlinx.coroutines.flow.Flow
@@ -15,12 +16,13 @@ class NotesRepositoryImpl  @Inject constructor(
 
     override suspend fun addNote(
         title: String,
-        content: String,
+        content: List<ContentItem>,
         isPinned: Boolean,
         updatedAt: Long
     ) {
-        val note = NoteDbModel(0,title,content,isPinned,updatedAt)
-        notesDao.addNote(note)
+        val note = Note(0,title,content,isPinned,updatedAt)
+        val noteDbModel = note.toDbModel()
+        notesDao.addNote(noteDbModel)
     }
 
     override suspend fun deleteNote(noteId: Int) {
