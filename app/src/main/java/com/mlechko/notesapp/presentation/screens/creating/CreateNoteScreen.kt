@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import com.mlechko.notesapp.R
 import com.mlechko.notesapp.domain.ContentItem
 import com.mlechko.notesapp.presentation.utils.DateFormatter
 import com.mlechko.notesapp.ui.theme.CustomIcons
@@ -78,7 +80,7 @@ fun CreateNoteScreen(
                     TopAppBar(
                         title = {
                             Text(
-                                text = "Create Note",
+                                text = stringResource(R.string.create_note),
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -91,12 +93,12 @@ fun CreateNoteScreen(
                         navigationIcon = {
                             Icon(
                                 modifier = Modifier
-                                    .padding(start=16.dp,end=8.dp)
-                                    .clickable{
+                                    .padding(start = 16.dp, end = 8.dp)
+                                    .clickable {
                                         viewModel.processCommand(CreateNoteCommand.Back)
                                     },
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = stringResource(R.string.back)
                             )
                         },
                         actions = {
@@ -107,7 +109,7 @@ fun CreateNoteScreen(
                                         imagePicker.launch("image/*")
                                     },
                                 imageVector = CustomIcons.AddPhoto,
-                                contentDescription = "Add photo from gallery",
+                                contentDescription = stringResource(R.string.add_photo_from_gallery),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -118,7 +120,8 @@ fun CreateNoteScreen(
                     modifier = Modifier.padding(innerPadding)
                 ) {
                     TextField(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(horizontal = 8.dp),
                         value = currentState.title,
                         onValueChange = {
@@ -137,7 +140,7 @@ fun CreateNoteScreen(
                         ),
                         placeholder = {
                             Text(
-                                text = "Title",
+                                text = stringResource(R.string.title),
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
@@ -180,7 +183,7 @@ fun CreateNoteScreen(
                         )
                     ) {
                         Text(
-                            text = "Save Note"
+                            text = stringResource(R.string.save_note)
                         )
                     }
                 }
@@ -273,7 +276,7 @@ private fun ImageContent(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(10.dp)),
             model = imageUrl,
-            contentDescription = "Image from gallery",
+            contentDescription = stringResource(R.string.image_from_gallery),
             contentScale = ContentScale.FillWidth
         )
         Icon(
@@ -299,7 +302,8 @@ private fun TextContent(
     onTextChange: (String) -> Unit
 ) {
     TextField(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .padding(horizontal = 8.dp),
         value = text,
         onValueChange = onTextChange,
@@ -315,7 +319,7 @@ private fun TextContent(
         ),
         placeholder = {
             Text(
-                text = "Note something down",
+                text = stringResource(R.string.note_something_down),
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
             )
