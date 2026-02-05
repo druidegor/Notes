@@ -21,9 +21,12 @@ class NotesRepositoryImpl  @Inject constructor(
         isPinned: Boolean,
         updatedAt: Long
     ) {
-        val note = Note(0,title,content.processForStorage(),isPinned,updatedAt)
-        val noteDbModel = note.toDbModel()
-        notesDao.addNote(noteDbModel)
+        val processedContent = content.processForStorage()
+        val noteDbModel = NoteDbModel(0,title,isPinned,updatedAt)
+        notesDao.addNoteWithContent(
+            noteDbModel,
+            processedContent
+        )
     }
 
     override suspend fun deleteNote(noteId: Int) {
@@ -53,7 +56,10 @@ class NotesRepositoryImpl  @Inject constructor(
         val processContent = note.content.processForStorage()
         val processNote = note.copy(content = processContent)
 
-        notesDao.addNote(processNote.toDbModel())
+        notesDao.updateNote(
+            noteDbModel = processNote.toDbModel(),
+            content = processContent.toContentItemDbModels(note.id)
+        )
     }
 
     override fun getAllNotes(): Flow<List<Note>> {
