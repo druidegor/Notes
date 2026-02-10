@@ -53,7 +53,7 @@ NotesApp — приложение для создания и хранения з
 1. Клонировать репозиторий:
 
 ```
-git clone https://github.com/druidegor/NotesApp.git
+git clone https://github.com/druidegor/Notes.git
 ```
 
 2. Открыть проект в Android Studio
